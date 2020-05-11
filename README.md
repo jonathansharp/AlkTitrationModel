@@ -6,4 +6,4 @@ Program to simulate a natural water titration in the presence of an unidentified
 
 If using this MATLAB routine, please cite:
 
-Sharp, J.D., Byrne, R.H. Interpreting measurements of total alkalinity in marine and estuarine waters in the presence of proton-binding organic matter. Submitted to Analytica Chimica Acta.
+Sharp, J.D., Byrne, R.H. Interpreting measurements of total alkalinity in marine and estuarine waters in the presence of proton-binding organic matter. Submitted to Deep-Sea Research Part I.
