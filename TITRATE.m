@@ -407,11 +407,7 @@ while any(abs(deltaTA) > 0.00001)
              kgSW.*(HSO4g+HFg+H3PO4g))./...
              (kgA_GR+kgSW))); deltaE0 = mean(deltaE0);
    Ep0      = Ep0-deltaE0;
-   
-%    Just to see ph at eq point
-%    kgeq=(-fit2.beta(1)./fit2.beta(2));
-%    [~,idxx] = min(abs(kgA-kgeq));
-%    pH(idxx)
+
 end
 
 TA_Gran = TA.*10.^6;
@@ -448,7 +444,6 @@ Eq = @(nlin,w)(nlin(1,1)-... % TA
 
 [nlin1]  = nlinfit(HTOT_est_CL,zeros(size(HTOT_est_CL,1),1),Eq,nlin0);
 
-% Fit Parameters
 TA_nlin1  = nlin1(1,1).*10.^6;
 
 %% CALCULATE ALKALINITY USING NON-LINEAR CURVE FITTING ACROSS GRAN RANGE (OPEN)
@@ -474,7 +469,6 @@ Eq2 = @(nlin,w)(nlin(1,1)+... % TA
 
 [nlin2] = nlinfit(HTOT_est_OP,zeros(size(HTOT_est_OP,1),1),Eq2,nlin0);
 
-% Fit Parameters
 TA_nlin2 = nlin2(1,1).*10.^6;
 
 %% CALCULATE ALKALINITY USING DIFFERENCE DERIVATIVE
