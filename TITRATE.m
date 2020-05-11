@@ -3,6 +3,7 @@ function [Result,Result_Headers] = TITRATE(SAL,TMP,DIC,PH,TP,TSI,NH4,...
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% INFORMATION
+%
 %  This function will provide measured total alkalinity values of a
 %  solution with the specified salinity, temperature, dissolved inorganic
 %  carbon, pH, and total concentrations of inorganic chemical species,
@@ -11,21 +12,43 @@ function [Result,Result_Headers] = TITRATE(SAL,TMP,DIC,PH,TP,TSI,NH4,...
 %  of titration and data analysis are used in this function to provide five
 %  distinct measured alkalinity values.
 %
-%  ***Syntax:
+%  ***SYNTAX:
 %   [Result,Result_Headers] = 
-%   TITRATE(Sal, Temp, DIC, pH, Total Phosphate, Total Silicate, Total
-%   Ammonia, Total Hydrogen Sulfide, Seawater Mass, Acid Concentration,
-%   Total Organic Acid #1, Organic Acid Dissociation Constant #1, Total
-%   Organic Acid #2, Organic Acid Dissociation Constant #2)
+%   TITRATE(SAL,TMP,DIC,PH,TP,TSI,NH4,H2S,MSW,CA,TORG,PKORG)
 %
-%  ***Syntax Example:
+%  ***SYNTAX EXAMPLE:
 %   [Result,Result_Headers] =
 %   TITRATE(35,25,2000,8.1,0.2,8.0,0,0,200,0.2,5,4.5,5,9.0)
 %
-%  ***Output:
-%   Result = [Inorganic Alk., Organic Alk., Open Cell Gran Alk., Closed
-%   Cell Nonlin. Alk., Open Cell Nonlin. Alk., Diff. Deriv. Alk.,
-%   Single-Step Alk.]
+%  ***INPUT:
+%    SAL:   Salnity
+%    TMP:   Titration temperature (degrees Celcius)
+%    DIC:   Total dissolved inorganic carbon (umol/kgSW)
+%    PH:    Total scale pH
+%    TP:    Total dissolved phosphate (umol/kgSW)
+%    TSI:   Total dissolved silicate (umol/kgSW)
+%    NH4:   Total dissolved ammonia (umol/kgSW)
+%    H2S:   Total dissolved hydrogen sulfide (umol/kgSW)
+%    MSW:   Mass of titrated seawater sample
+%    CA:    Acid concentration (mol/kg)
+%    TORG:  Total organic concentration (umol/kgSW)
+%    PKORG: Organic acid dissociation constant
+%
+%  ***OUTPUT:
+%    Result = array containing the following values (one row per sample):
+%    COL  VALUE
+%    1    Inorganic Alkalinity defined by Dickson (1981)
+%    2    Organic Alkalinity (organic bases treated using pK = 4.5 as the
+%         cutoff for the zero level of protons)
+%    3    Open Cell Gran Alkalinity
+%    4    Closed Cell Nonlinear Fit Alkalinity
+%    5    Open Cell Nonlinear Fit Alkalinity
+%    6    Difference Derivative Alkalinity
+%    7    Single-Step Alkalinity
+%         * Values 3-7 result from a given treatment of the simulated
+%           titration data
+%    Result_Headers = cell array containing descriptions of 'Result'
+%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% INPUT CONDITIONING
