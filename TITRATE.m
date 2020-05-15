@@ -1,5 +1,6 @@
 function [Result,Result_Headers] = TITRATE(SAL,TMP,DIC,PH,TP,TSI,NH4,...
-                                       H2S,MSW,CA,TORG,PKORG)
+                                       H2S,MSW,CA,TORG1,PKORG1,TORG2,...
+				       PKORG2,TORG3,PKORG3)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% INFORMATION
@@ -57,7 +58,8 @@ function [Result,Result_Headers] = TITRATE(SAL,TMP,DIC,PH,TP,TSI,NH4,...
 veclengths = ...
 [ length(SAL)   length(TMP)    length(DIC)    length(PH)        length(TP)...
   length(TSI)   length(NH4)    length(H2S)    length(MSW)       length(CA)...
-  length(TORG)  length(PKORG)];
+  length(TORG1) length(PKORG1) length(TORG2)  length(PKORG2)    length(TORG3)...
+  length(PKORG3)];
 
 if length(unique(veclengths))>2
 	disp(' '); disp('*** INPUT ERROR: Input vectors must all be of same length, or of length 1. ***'); disp(' '); return
@@ -74,8 +76,12 @@ NH4    = NH4    (:);
 H2S    = H2S    (:);
 MSW    = MSW    (:);
 CA     = CA     (:);
-TORG   = TORG   (:);
-PKORG  = PKORG  (:);
+TORG1  = TORG1  (:);
+PKORG1 = PKORG1 (:);
+TORG2  = TORG2  (:);
+PKORG2 = PKORG2 (:);
+TORG3  = TORG3  (:);
+PKORG3 = PKORG3 (:);
 
 % Find the longest column vector:
 ntps   = max(veclengths);
@@ -92,8 +98,12 @@ NH4(1:ntps,1)    = NH4(:);
 H2S(1:ntps,1)    = H2S(:);
 MSW(1:ntps,1)    = MSW(:);
 CA(1:ntps,1)     = CA(:);
-TORG(1:ntps,1)   = TORG(:);
-PKORG(1:ntps,1)  = PKORG(:);
+TORG1(1:ntps,1)  = TORG1(:);
+PKORG1(1:ntps,1) = PKORG1(:);
+TORG2(1:ntps,1)  = TORG2(:);
+PKORG2(1:ntps,1) = PKORG2(:);
+TORG3(1:ntps,1)  = TORG3(:);
+PKORG3(1:ntps,1) = PKORG3(:);
 
 %% DEFINE RATIOS OF CONSERVATIVE CONSTITUENTS
 
@@ -135,9 +145,9 @@ if  SAL(w) >= 20
 % Carbonic acid dissociation constants from Leuker et al. (2000)
 % S=19:43 T=2:35
   KC1(w) = 10.^-(3633.86./(TMP(w)+273.15)-61.2172+9.6777.*log(TMP(w)+273.15)-...
-           0.011555.*SAL(w)+0.0001152.*SAL(w).^2);     
+           0.011555.*SAL(w)+0.0001152.*SAL(w).^2)';     
   KC2(w) = 10.^-(471.78./(TMP(w)+273.15)+25.929-3.16967.*log(TMP(w)+273.15)-...
-           0.01781.*SAL(w)+0.0001122.*SAL(w).^2);
+           0.01781.*SAL(w)+0.0001122.*SAL(w).^2)';
 elseif   SAL(w) > 0 && SAL(w) < 20
 % Carbonic acid dissociation constants from Waters et al. (2014), which fixed
 % inconsistencies with Millero (2010) identified by Orr et al. (2015)
@@ -194,7 +204,7 @@ end
   KS1 = (exp(225.838-13275.3./(TMP+273.15)-34.6435.*log(TMP+273.15)+0.3449.*...
         SAL.^0.5-0.0274.*SAL)).*Y;
 % Defined organic acid dissociation constant
-  KORG = 10.^-PKORG;
+  KORG1 = 10.^-PKORG1; KORG2 = 10.^-PKORG2; KORG3 = 10.^-PKORG3;
   
 %% IDEAL GAS CONSTANT (kCal/(mol*K)) AND FARADAY CONSTANT (kCal/mol)
 
@@ -224,13 +234,17 @@ HSO4   = (TS(x).*10.^-6)./(1+(KS(x)./HFr));
 HF     = (TF(x).*10.^-6)./(1+(KF(x)./HTOT));
 H3PO4  = (TP(x).*10.^-6)./(1+KP1(x)./HTOT+(KP1(x).*KP2(x))./(HTOT.^2)+...
          (KP1(x).*KP2(x).*KP3(x))./(HTOT.^3));
-if        PKORG(x) >= 4.5; ORGa = (TORG(x).*10.^-6)./(1+HTOT./KORG(x));
-elseif    PKORG(x) < 4.5;  ORGd = (TORG(x).*10.^-6)./(1+KORG(x)./HTOT); end
-TA       = (10.^6).*(HCO3+2.*CO3+BOH4+OH+2.*PO4+HPO4+SiO4H3+NH3+HS+ORGa-...
-                     HFr-HSO4-HF-H3PO4-ORGd);
+if        PKORG1(x) >= 4.5; ORGa1 = (TORG1(x).*10.^-6)./(1+HTOT./KORG1(x));
+elseif    PKORG1(x) < 4.5;  ORGd1 = (TORG1(x).*10.^-6)./(1+KORG1(x)./HTOT); end
+if        PKORG2(x) >= 4.5; ORGa2 = (TORG2(x).*10.^-6)./(1+HTOT./KORG2(x));
+elseif    PKORG2(x) < 4.5;  ORGd2 = (TORG2(x).*10.^-6)./(1+KORG2(x)./HTOT); end
+if        PKORG3(x) >= 4.5; ORGa3 = (TORG3(x).*10.^-6)./(1+HTOT./KORG3(x));
+elseif    PKORG3(x) < 4.5;  ORGd3 = (TORG3(x).*10.^-6)./(1+KORG3(x)./HTOT); end
+TA       = (10.^6).*(HCO3+2.*CO3+BOH4+OH+2.*PO4+HPO4+SiO4H3+NH3+HS+ORGa1+...
+                     ORGa2+ORGa3-HFr-HSO4-HF-H3PO4-ORGd1-ORGd2-ORGd3);
 TA_inorg = (10.^6).*(HCO3+2.*CO3+BOH4+OH+2.*PO4+HPO4+SiO4H3+NH3+HS-...
                      HFr-HSO4-HF-H3PO4);
-TA_org   = (10.^6).*(ORGa-ORGd);
+TA_org   = (10.^6).*(ORGa1+ORGa2+ORGa3-ORGd1-ORGd2-ORGd3);
 
 %% PREPARE ACIDIMETRIC TITRATION
 
@@ -270,14 +284,19 @@ while any(abs(deltapH) > pHTol)
     HF        = (TF(x).*10.^-6)./(1+(KF(x)./HTOT));
     H3PO4     = (TP(x).*10.^-6)./(1+KP1(x)./HTOT+(KP1(x).*KP2(x))./(HTOT.^2)+...
                 (KP1(x).*KP2(x).*KP3(x))./(HTOT.^3));
-    if     PKORG(x)  >= 4.5; ORGa  = (TORG(x).*10.^-6)./(1+HTOT./KORG(x));
-    elseif PKORG(x)   < 4.5; ORGd  = (TORG(x).*10.^-6)./(1+KORG(x)./HTOT); end
+    if     PKORG1(x)  >= 4.5; ORGa1  = (TORG1(x).*10.^-6)./(1+HTOT./KORG1(x));
+    elseif PKORG1(x)   < 4.5; ORGd1  = (TORG1(x).*10.^-6)./(1+KORG1(x)./HTOT); end
+    if     PKORG2(x)  >= 4.5; ORGa2  = (TORG2(x).*10.^-6)./(1+HTOT./KORG2(x));
+    elseif PKORG2(x)   < 4.5; ORGd2  = (TORG2(x).*10.^-6)./(1+KORG2(x)./HTOT); end
+    if     PKORG3(x)  >= 4.5; ORGa3  = (TORG3(x).*10.^-6)./(1+HTOT./KORG3(x));
+    elseif PKORG3(x)   < 4.5; ORGd3  = (TORG3(x).*10.^-6)./(1+KORG3(x)./HTOT); end
     
     % Difference between initial TA and calculated TA at each titration step
     Residual  = (TA.*10.^-6).*kgSW-HCO3.*kgSW-2.*CO3.*kgSW-BOH4.*kgSW-...
                 OH.*kgTOT-2.*PO4.*kgSW-HPO4.*kgSW-SiO4H3.*kgSW-NH3.*kgSW-...
                 HS.*kgSW+HFr.*kgTOT+HSO4.*kgSW+HF.*kgSW+H3PO4.*kgSW-...
-                CA(x).*kgA-ORGa.*kgSW+ORGd.*kgSW;
+                CA(x).*kgA-ORGa1.*kgSW+ORGd1.*kgSW-ORGa2.*kgSW+ORGd2.*kgSW-...
+		ORGa3.*kgSW+ORGd3.*kgSW;
     
     % find Slope dTA/dpH
     Slope     = log(10).*(((DIC(x).*10.^-6).*kgSW.*KC1(x).*HTOT.*(HTOT.^2+...
@@ -290,8 +309,12 @@ while any(abs(deltapH) > pHTol)
                 (HTOT.^3+KP1(x).*HTOT.^2+KP1(x).*KP2(x).*HTOT+KP1(x).*...
                 KP2(x).*KP3(x)).^2)+... % PAlk
                 (SiO4H3.*HTOT.*kgSW./(HTOT+KSI(x)))+... % SiAlk
-                ORGa.*HTOT.*kgSW./(HTOT+KORG(x))+...
-                ORGd.*HTOT.*kgSW./(HTOT+KORG(x))+... % OrgAlk
+                ORGa1.*HTOT.*kgSW./(HTOT+KORG1(x))+...
+                ORGd1.*HTOT.*kgSW./(HTOT+KORG1(x))+...
+		ORGa2.*HTOT.*kgSW./(HTOT+KORG2(x))+...
+                ORGd2.*HTOT.*kgSW./(HTOT+KORG2(x))+...
+		ORGa3.*HTOT.*kgSW./(HTOT+KORG3(x))+...
+                ORGd3.*HTOT.*kgSW./(HTOT+KORG3(x))+... % OrgAlk
                 NH3.*HTOT.*kgSW./(HTOT+KNH4(x))+... % NH3Alk
                 HS.*HTOT.*kgSW./(HTOT+KS1(x))+... % HSAlk
                 HSO4.*HFr.*kgSW./(HFr+KS(x))+... % HSO4Alk
@@ -337,14 +360,18 @@ while any(abs(deltapH) > pHTol)
     HFp        = (TF(x).*10.^-6)./(1+(KF(x)./HTOTp));
     H3PO4p     = (TP(x).*10.^-6)./(1+KP1(x)./HTOTp+(KP1(x).*KP2(x))./(HTOTp.^2)+...
                  (KP1(x).*KP2(x).*KP3(x))./(HTOTp.^3));
-    if     PKORG(x)  >= 4.5; ORGap  = (TORG(x).*10.^-6)./(1+HTOTp./KORG(x));
-    elseif PKORG(x)   < 4.5; ORGdp  = (TORG(x).*10.^-6)./(1+KORG(x)./HTOTp); end
-  
+    if     PKORG1(x)  >= 4.5; ORGap1  = (TORG1(x).*10.^-6)./(1+HTOTp./KORG1(x));
+    elseif PKORG1(x)   < 4.5; ORGdp1  = (TORG1(x).*10.^-6)./(1+KORG1(x)./HTOTp); end
+    if     PKORG2(x)  >= 4.5; ORGap2  = (TORG2(x).*10.^-6)./(1+HTOTp./KORG2(x));
+    elseif PKORG2(x)   < 4.5; ORGdp2  = (TORG2(x).*10.^-6)./(1+KORG2(x)./HTOTp); end
+    if     PKORG3(x)  >= 4.5; ORGap3  = (TORG3(x).*10.^-6)./(1+HTOTp./KORG3(x));
+    elseif PKORG3(x)   < 4.5; ORGdp3  = (TORG3(x).*10.^-6)./(1+KORG3(x)./HTOTp); end
+    
     % Difference between initial TA and calculated TA at each titration step
     Residual  = (TA.*10.^-6).*kgSW-BOH4p.*kgSW-OHp.*kgTOT-2.*PO4p.*kgSW-...
                 HPO4p.*kgSW-SiO4H3p.*kgSW-NH3p.*kgSW-HSp.*kgSW+HFrp.*kgTOT+...
-                HSO4p.*kgSW+HFp.*kgSW+H3PO4p.*kgSW-CA(x).*kgA-ORGap.*kgSW+...
-                ORGdp.*kgSW;
+                HSO4p.*kgSW+HFp.*kgSW+H3PO4p.*kgSW-CA(x).*kgA-ORGap1.*kgSW+...
+                ORGdp1.*kgSW-ORGap2.*kgSW+ORGdp2.*kgSW-ORGap3.*kgSW+ORGdp3.*kgSW;
 
     % find Slope dTA/dpH
     Slope     = log(10).*(BOH4p.*HTOTp.*kgSW./(HTOTp+KB(x))+... % BAlk
@@ -354,8 +381,12 @@ while any(abs(deltapH) > pHTol)
                 (HTOTp.^3+KP1(x).*HTOTp.^2+KP1(x).*KP2(x).*HTOTp+KP1(x).*...
                 KP2(x).*KP3(x)).^2)+... % PAlk
                 SiO4H3p.*HTOTp.*kgSW./(HTOTp+KSI(x))+... % SiAlk
-                ORGap.*HTOTp.*kgSW./(HTOTp+KORG(x))+...
-                ORGdp.*HTOTp.*kgSW./(HTOTp+KORG(x))+... % OrgAlk
+                ORGap1.*HTOTp.*kgSW./(HTOTp+KORG1(x))+...
+                ORGdp1.*HTOTp.*kgSW./(HTOTp+KORG1(x))+...
+		ORGap2.*HTOTp.*kgSW./(HTOTp+KORG2(x))+...
+                ORGdp2.*HTOTp.*kgSW./(HTOTp+KORG2(x))+...
+		ORGap3.*HTOTp.*kgSW./(HTOTp+KORG3(x))+...
+                ORGdp3.*HTOTp.*kgSW./(HTOTp+KORG3(x))+... % OrgAlk
                 NH3p.*HTOTp.*kgSW./(HTOTp+KNH4(x))+... % NH3Alk
                 HSp.*HTOTp.*kgSW./(HTOTp+KS1(x))+... % HSAlk
                 HSO4p.*HFrp.*kgSW./(HFrp+KS(x))+... % HSO4Alk
