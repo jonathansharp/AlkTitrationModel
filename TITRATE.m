@@ -215,7 +215,9 @@ end
 for x = 1:ntps
 
 % Set organics to zero
-ORGa  = 0; ORGd  = 0; ORGap  = 0; ORGdp  = 0;
+ORGa1  = 0; ORGd1  = 0; ORGap1  = 0; ORGdp1  = 0;
+ORGa2  = 0; ORGd2  = 0; ORGap2  = 0; ORGdp2  = 0;
+ORGa3  = 0; ORGd3  = 0; ORGap3  = 0; ORGdp3  = 0;
 
 %% CALCULATE TA FROM pH AND TOTAL CARBON
 HTOT   = 10.^(-PH(x));
