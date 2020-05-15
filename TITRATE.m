@@ -412,9 +412,10 @@ Ep  = 400+(Rg.*(TMP(x)+273.15)./F).*log(10.^-pHp);
 DATAp(S,1)=MA; DATAp(S,2)=pHp; DATAp(S,3)=HTOTp; DATAp(S,4)=Ep;
 
 S=S+1;
-end;
 
-%% DEFINE ACID MASS, pH, AND E FOR CALCULATIONS
+end
+
+%% EXTRACT ACID MASS, pH, H+, AND E FROM 'DATA' FOR CALCULATIONS
 MA  =  DATA(:,1);
 kgA =  DATA(:,1).*10.^-3;
 pH  =  DATA(:,2);
@@ -552,7 +553,7 @@ TA_YaoByrne = (10.^6).*((CA(x).*kgAi-...                            % HCl
 %% LOG THE RESULTS
 Result(x,:) = [TA_inorg,TA_org,TA_Gran,TA_nlin1,TA_nlin2,TA_Diff,TA_YaoByrne];
 
-end;
+end
 
 Result_Headers = {'Inorg. TA Input','Org. TA Input','Gran TA','Nonlinear TA',...
                   'Open Cell TA','Difference Derivative TA','Single Endpoint TA'};
