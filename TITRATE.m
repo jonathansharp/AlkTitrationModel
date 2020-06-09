@@ -1,6 +1,6 @@
 function [Result,Result_Headers] = TITRATE(SAL,TMP,DIC,PH,TP,TSI,NH4,...
                                        H2S,MSW,CA,TORG1,PKORG1,TORG2,...
-				       PKORG2,TORG3,PKORG3)
+				                       PKORG2,TORG3,PKORG3)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% INFORMATION
@@ -555,5 +555,5 @@ Result(x,:) = [TA_inorg,TA_org,TA_Gran,TA_nlin1,TA_nlin2,TA_Diff,TA_YaoByrne];
 
 end
 
-Result_Headers = {'Inorg. TA Input','Org. TA Input','Gran TA','Nonlinear TA',...
-                  'Open Cell TA','Difference Derivative TA','Single Endpoint TA'};
+Result_Headers = {'Inorg. TA Input','Org. TA Input','Open-Cell Gran TA','Closed-Cell Nonlinear Fit TA',...
+                  'Open-Cell Nonlinear Fit TA','Difference Derivative TA','Single-Step TA'};
