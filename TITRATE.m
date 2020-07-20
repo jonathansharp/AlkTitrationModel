@@ -214,7 +214,7 @@ end
 
 for x = 1:ntps
 
-% Set organics to zero
+% Set organic proton acceptors and donors to zero
 ORGa1  = 0; ORGd1  = 0; ORGap1  = 0; ORGdp1  = 0;
 ORGa2  = 0; ORGd2  = 0; ORGap2  = 0; ORGdp2  = 0;
 ORGa3  = 0; ORGd3  = 0; ORGap3  = 0; ORGdp3  = 0;
@@ -425,7 +425,7 @@ Hp  =  DATAp(:,3);
 E   =  DATA(:,4);
 Ep  =  DATAp(:,4);
 
-%% CALCULATE ALKALINITY USING THE SECOND GRAN FUNCTION
+%% CALCULATE ALKALINITY USING THE SECOND GRAN FUNCTION (OPEN-CELL)
 % Index to a pH Range of 3 to 3.5
 GRidx = pHp > 3.0 & pHp < 3.5;
 Ep_GR  = Ep(GRidx); kgA_GR = kgA(GRidx);
@@ -469,7 +469,7 @@ end
 
 TA_Gran = TA.*10.^6;
 
-%% CALCULATE ALKALINITY (AND TOTAL CARBON) USING NON-LINEAR CURVE FITTING (CLOSED)
+%% CALCULATE ALKALINITY (AND TOTAL CARBON) USING NON-LINEAR CURVE FITTING (CLOSED-CELL)
 CLidx = pH > 3 & pH < 3.5;
 E_CL  = E(CLidx); kgA_CL = kgA(CLidx);
 
@@ -503,7 +503,7 @@ Eq = @(nlin,w)(nlin(1,1)-... % TA
 
 TA_nlin1  = nlin1(1,1).*10.^6;
 
-%% CALCULATE ALKALINITY USING NON-LINEAR CURVE FITTING ACROSS GRAN RANGE (OPEN)
+%% CALCULATE ALKALINITY USING NON-LINEAR CURVE FITTING ACROSS GRAN RANGE (OPEN-CELL)
 OPidx = pHp > 3.0 & pHp < 3.5;
 Ep_OP    = Ep(OPidx); kgA_OP = kgA(OPidx);
 
@@ -537,7 +537,7 @@ deriv   = fnder(sp);
 zer2    = fnzeros(deriv);
 TA_Diff = (10.^6).*((zer2(end,end).*CA(x))./kgSW);
 
-%% CALCULATE ALKALINITY USING YAO AND BYRNE METHOD
+%% CALCULATE ALKALINITY USING SINGLE-STEP METHOD
  % Index to pH endpoint which will be used to minimize excess acid
 spH       = spline(pH,kgA);
 kgAi      = ppval(spH,4.2);
