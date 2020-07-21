@@ -15,25 +15,25 @@ function [Result,Result_Headers] = TITRATE(SAL,TMP,DIC,PH,TP,TSI,NH4,...
 %
 %  ***SYNTAX:
 %   [Result,Result_Headers] = 
-%   TITRATE(SAL,TMP,DIC,PH,TP,TSI,NH4,H2S,MSW,CA,TORG,PKORG)
+%   TITRATE(SAL,TMP,DIC,PH,TP,TSI,NH4,H2S,MSW,CA,TORG1,PKORG1,TORG2,PKORG2,TORG3,PKORG3)
 %
 %  ***SYNTAX EXAMPLE:
 %   [Result,Result_Headers] =
-%   TITRATE(35,25,2000,8.1,0.2,8.0,0,0,200,0.2,5,4.5,5,9.0)
+%   TITRATE(35,25,2000,8.1,0.2,8.0,0,0,200,0.2,5,4.5,5,9.0,0,0.0)
 %
 %  ***INPUT:
 %    SAL:   Salnity
-%    TMP:   Titration temperature (degrees Celcius)
-%    DIC:   Total dissolved inorganic carbon (umol/kgSW)
-%    PH:    Total scale pH
-%    TP:    Total dissolved phosphate (umol/kgSW)
-%    TSI:   Total dissolved silicate (umol/kgSW)
-%    NH4:   Total dissolved ammonia (umol/kgSW)
-%    H2S:   Total dissolved hydrogen sulfide (umol/kgSW)
-%    MSW:   Mass of titrated seawater sample
-%    CA:    Acid concentration (mol/kg)
-%    TORG:  Total organic concentration (umol/kgSW)
-%    PKORG: Organic acid dissociation constant
+%    TMP:    Titration temperature (degrees Celcius)
+%    DIC:    Total dissolved inorganic carbon (umol/kgSW)
+%    PH:     Total scale pH
+%    TP:     Total dissolved phosphate (umol/kgSW)
+%    TSI:    Total dissolved silicate (umol/kgSW)
+%    NH4:    Total dissolved ammonia (umol/kgSW)
+%    H2S:    Total dissolved hydrogen sulfide (umol/kgSW)
+%    MSW:    Mass of titrated seawater sample
+%    CA:     Acid concentration (mol/kg)
+%    TORGx:  Total organic concentration x (umol/kgSW)
+%    PKORGx: Organic acid dissociation constant x
 %
 %  ***OUTPUT:
 %    Result = array containing the following values (one row per sample):
@@ -436,7 +436,7 @@ A0_est_GR    = (A0_est_GR.Coefficients.Estimate(1).*CA(x))./kgSW;
 Ep0_est_GR   = Ep_GR - (((Rg.*(TMP(x)+273.15))./F).*...
                log((kgA_GR.*CA(x)-kgSW.*A0_est_GR)./(kgA_GR+kgSW)));
 Ep0_est_GR   = mean(Ep0_est_GR);
-% Set initial value for E0
+% Set initial values for E0 and TA
 Ep0      = Ep0_est_GR;
 TA       = A0_est_GR;
 deltaTA  = 1;
@@ -465,16 +465,17 @@ end
 TA_Gran = TA.*10.^6;
 
 %% CALCULATE ALKALINITY (AND TOTAL CARBON) USING NON-LINEAR CURVE FITTING (CLOSED-CELL)
-% Index to low-pH range
+% Index to low-pH range for initial estimates
 CLidx = pH > 3 & pH < 3.5;
 E_CL  = E(CLidx); kgA_CL = kgA(CLidx);
-% Obtain initial estimates for alkalinity, E0, and H
+% Obtain initial estimates for alkalinity and E0
 F_est_CL    = (kgA_CL+kgSW).*exp(E_CL./((Rg.*(TMP(x)+273.15))./F));
 A0_est_CL   = fitlm(F_est_CL,kgA_CL);
 A0_est_CL   = (A0_est_CL.Coefficients.Estimate(1).*CA(x))./kgSW;
 E0_est_CL   = E_CL - (((Rg.*(TMP(x)+273.15))./F).*...
               log((kgA_CL.*CA(x)-kgSW.*A0_est_CL)./(kgA_CL+kgSW)));
 E0_est_CL   = mean(E0_est_CL);
+% Obtain initial estimate for H
 HTOT_est_CL = exp((E-E0_est_CL)./((Rg.*(TMP(x)+273.15))./F));
 f           = 1;
 % Fit full titration curve
@@ -501,13 +502,14 @@ TA_nlin1  = nlin1(1,1).*10.^6;
 % Index to low-pH range
 OPidx = pHp > 3.0 & pHp < 3.5;
 Ep_OP    = Ep(OPidx); kgA_OP = kgA(OPidx);
-% Obtain initial estimates for alkalinity, E0, and H
+% Obtain initial estimates for alkalinity and E0
 F_est_OP    = (kgA_OP+kgSW).*exp(Ep_OP./((Rg.*(TMP(x)+273.15))./F));
 A0_est_OP   = fitlm(F_est_OP,kgA_OP);
 A0_est_OP   = (A0_est_OP.Coefficients.Estimate(1).*CA(x))./kgSW;
 Ep0_est_OP  = Ep_OP - (((Rg.*(TMP(x)+273.15))./F).*...
               log((kgA_OP.*CA(x)-kgSW.*A0_est_OP)./(kgA_OP+kgSW)));
 Ep0_est_OP  = mean(Ep0_est_OP);
+% Obtain initial estimate for H
 HTOT_est_OP = exp((Ep_OP-Ep0_est_OP)./((Rg.*(TMP(x)+273.15))./F));
 f           = 1;
 % Fit open titration curve
