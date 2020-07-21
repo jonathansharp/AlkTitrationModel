@@ -429,7 +429,6 @@ Ep  =  DATAp(:,4);
 % Index to a pH Range of 3 to 3.5
 GRidx = pHp > 3.0 & pHp < 3.5;
 Ep_GR  = Ep(GRidx); kgA_GR = kgA(GRidx);
-
 % Obtain initial estimates of F2, TA, E0
 F_est_GR     = (kgA_GR+kgSW).*exp(Ep_GR./((Rg.*(TMP(x)+273.15))./F));
 A0_est_GR    = fitlm(F_est_GR,kgA_GR);
@@ -437,22 +436,19 @@ A0_est_GR    = (A0_est_GR.Coefficients.Estimate(1).*CA(x))./kgSW;
 Ep0_est_GR   = Ep_GR - (((Rg.*(TMP(x)+273.15))./F).*...
                log((kgA_GR.*CA(x)-kgSW.*A0_est_GR)./(kgA_GR+kgSW)));
 Ep0_est_GR   = mean(Ep0_est_GR);
-
 % Set initial value for E0
 Ep0      = Ep0_est_GR;
 TA       = A0_est_GR;
 deltaTA  = 1;
-
+% Iteratively determine TA
 while any(abs(deltaTA) > 0.00001)
-   
    HTOTg  = exp((Ep_GR - Ep0)./(Rg.*(TMP(x)+273.15)./F));
    HFrg   = HTOTg./Z(x);
    HSO4g  = ((TS(x).*10.^-6)./(1+KS(x)./HFrg));
    HFg    = ((TF(x).*10.^-6)./(1+KF(x)./HTOTg));
    H3PO4g = ((TP(x).*10.^-6)./(1+KP1(x)./HTOTg+(KP1(x).*KP2(x))./(HTOTg.^2)+...
             (KP1(x).*KP2(x).*KP3(x))./(HTOTg.^3)));
-        
-   F2    = (kgSW+kgA_GR).*HFrg+kgSW.*(HSO4g+HFg+H3PO4g);
+   F2     = (kgSW+kgA_GR).*HFrg+kgSW.*(HSO4g+HFg+H3PO4g);
    
    TA0     = TA;
    fit2    = regstats(F2,kgA_GR,'linear','beta');
@@ -463,16 +459,16 @@ while any(abs(deltaTA) > 0.00001)
              log((kgA_GR.*CA(x)-TA.*kgSW-...
              kgSW.*(HSO4g+HFg+H3PO4g))./...
              (kgA_GR+kgSW))); deltaE0 = mean(deltaE0);
-   Ep0      = Ep0-deltaE0;
-
+   Ep0     = Ep0-deltaE0;
 end
 
 TA_Gran = TA.*10.^6;
 
 %% CALCULATE ALKALINITY (AND TOTAL CARBON) USING NON-LINEAR CURVE FITTING (CLOSED-CELL)
+% Index to low-pH range
 CLidx = pH > 3 & pH < 3.5;
 E_CL  = E(CLidx); kgA_CL = kgA(CLidx);
-
+% Obtain initial estimates for alkalinity, E0, and H
 F_est_CL    = (kgA_CL+kgSW).*exp(E_CL./((Rg.*(TMP(x)+273.15))./F));
 A0_est_CL   = fitlm(F_est_CL,kgA_CL);
 A0_est_CL   = (A0_est_CL.Coefficients.Estimate(1).*CA(x))./kgSW;
@@ -481,9 +477,8 @@ E0_est_CL   = E_CL - (((Rg.*(TMP(x)+273.15))./F).*...
 E0_est_CL   = mean(E0_est_CL);
 HTOT_est_CL = exp((E-E0_est_CL)./((Rg.*(TMP(x)+273.15))./F));
 f           = 1;
-
+% Fit full titration curve
 nlin0 = [A0_est_CL 0.002 f];
-
 Eq = @(nlin,w)(nlin(1,1)-... % TA
    nlin(1,2).*((KC1(x).*nlin(1,3).*HTOT_est_CL+2.*KC1(x).*KC2(x))./...
    ((nlin(1,3).*HTOT_est_CL).^2+KC1(x).*nlin(1,3).*HTOT_est_CL+KC1(x).*KC2(x)))-... % CAlk
@@ -498,15 +493,15 @@ Eq = @(nlin,w)(nlin(1,1)-... % TA
    ((kgSW+kgA)./kgSW).*(((nlin(1,3).*HTOT_est_CL)./Z(x))-... % HFr
    (KW(x)./(nlin(1,3).*HTOT_est_CL)))-... % OH
    (kgA./kgSW).*CA(x));
-
 [nlin1]  = nlinfit(HTOT_est_CL,zeros(size(HTOT_est_CL,1),1),Eq,nlin0);
 
 TA_nlin1  = nlin1(1,1).*10.^6;
 
 %% CALCULATE ALKALINITY USING NON-LINEAR CURVE FITTING ACROSS GRAN RANGE (OPEN-CELL)
+% Index to low-pH range
 OPidx = pHp > 3.0 & pHp < 3.5;
 Ep_OP    = Ep(OPidx); kgA_OP = kgA(OPidx);
-
+% Obtain initial estimates for alkalinity, E0, and H
 F_est_OP    = (kgA_OP+kgSW).*exp(Ep_OP./((Rg.*(TMP(x)+273.15))./F));
 A0_est_OP   = fitlm(F_est_OP,kgA_OP);
 A0_est_OP   = (A0_est_OP.Coefficients.Estimate(1).*CA(x))./kgSW;
@@ -515,21 +510,18 @@ Ep0_est_OP  = Ep_OP - (((Rg.*(TMP(x)+273.15))./F).*...
 Ep0_est_OP  = mean(Ep0_est_OP);
 HTOT_est_OP = exp((Ep_OP-Ep0_est_OP)./((Rg.*(TMP(x)+273.15))./F));
 f           = 1;
-
+% Fit open titration curve
 nlin0 = [A0_est_OP f];
-         
 Eq2 = @(nlin,w)(nlin(1,1)+... % TA
        (TS(x).*10.^-6)./(1+(KS(x)./((nlin(1,2).*HTOT_est_OP)./Z(x))))+... % HSO4
        ((TF(x).*10.^-6)./(1+(KF(x)./(nlin(1,2).*HTOT_est_OP))))+... % HF
        ((kgSW+kgA_OP)./kgSW).*(((nlin(1,2).*HTOT_est_OP)./Z(x)))-... % HFr
        (kgA_OP./kgSW).*CA(x));
-
 [nlin2] = nlinfit(HTOT_est_OP,zeros(size(HTOT_est_OP,1),1),Eq2,nlin0);
 
 TA_nlin2 = nlin2(1,1).*10.^6;
 
 %% CALCULATE ALKALINITY USING DIFFERENCE DERIVATIVE
-
 Diffs   = -diff(E)./diff(MA);
 kgA0    = kgA(2:end);
 sp      = spline(kgA0,Diffs);
@@ -538,7 +530,7 @@ zer2    = fnzeros(deriv);
 TA_Diff = (10.^6).*((zer2(end,end).*CA(x))./kgSW);
 
 %% CALCULATE ALKALINITY USING SINGLE-STEP METHOD
- % Index to pH endpoint which will be used to minimize excess acid
+% Index to pH endpoint which will be used to minimize excess acid
 spH       = spline(pH,kgA);
 kgAi      = ppval(spH,4.2);
 sHp       = spline(pH,Hp);
