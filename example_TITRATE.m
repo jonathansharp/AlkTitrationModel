@@ -54,27 +54,3 @@ legend({'Diff. Deriv.','Single-Step','Closed-Cell','Open-Cell'},...
     'Location','northoutside','NumColumns',4); % add legend
 c = colorbar('northoutside'); c.Label.String = 'TA_{meas} (\mumol/kg)';
 hold off
-
-% % This calculates pH using measured TA and DIC, then plots the difference
-% % between measured and calculated pH against measured pH.
-% PH_25_M = CO2SYS(PH,DIC,3,2,SAL,PH_TMP,25,0,0,SIL,PO4,1,10,3); PH_25_M = PH_25_M(:,18);
-% PH_25_C = CO2SYS(TA_M,DIC,1,2,SAL,20,25,0,0,SIL,PO4,1,10,3);   PH_25_C = PH_25_C(:,18);
-% mdl  = fitlm(PH_25_M,PH_25_M-PH_25_C);
-% yfit = table2array(mdl.Coefficients(2,1)).*PH_25_M+table2array(mdl.Coefficients(1,1));
-% figure; clf; hold on
-% scatter(PH_25_M,PH_25_M-PH_25_C);
-% plot(PH_25_M,yfit);
-% ylim([-0.04 0.02]);
-% hold off
-% 
-% % This calculates pH using modelled TA and DIC, then plots the difference
-% % between measured and calculated pH against measured pH.
-% PH_25_M = CO2SYS(PH,DIC,3,2,SAL,PH_TMP,25,0,0,SIL,PO4,1,10,3); PH_25_M = PH_25_M(:,18);
-% PH_25_C = CO2SYS(TA_M'-(Result(:,4)-Result(:,1)),DIC,1,2,SAL,20,25,0,0,SIL,PO4,1,10,3);   PH_25_C = PH_25_C(:,18);
-% mdl  = fitlm(PH_25_M,PH_25_M-PH_25_C);
-% yfit = table2array(mdl.Coefficients(2,1)).*PH_25_M+table2array(mdl.Coefficients(1,1));
-% figure; clf; hold on
-% scatter(PH_25_M,PH_25_M-PH_25_C);
-% plot(PH_25_M,yfit);
-% ylim([-0.04 0.02]);
-% hold off
